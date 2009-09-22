@@ -19,31 +19,57 @@
 (defn- credentials [user password]
   (str "Basic " (clojure.contrib.base64/encode-str (str user ":" password))))
 
+(defn- to-string [arg]
+  (if (keyword? arg)
+    (name arg)
+    (str arg)))
+
+(defn encode-options [options]
+  ;; (println "encode options" options)
+  (if options
+    (apply str "?"
+	   (interpose "&"
+		      (map #(str (to-string (first %)) "="
+				 (URLEncoder/encode (to-string (second %)) "UTF-8"))
+			   options)))))
+
+(defn encode-path [path]
+  (apply str (interpose "/" (map #(URLEncoder/encode %) (seq (.split path "/"))))))
+
 (defn send-request
   "Send a request to FluidDB.
    We inspect the return data and convert it to a lisp data structure if it is json"
-  ([method path] (send-request method path nil nil))
-  ([method path body-data] (send-request method path body-data nil))
-  ([method path body-data options]
-     (println "PAYLOAD " body-data)
+  ([method path] (send-request method path nil nil nil))
+  ([method path path-options] (send-request method path path-options nil nil))
+  ([method path path-options body-data] (send-request method path path-options body-data nil))
+  ([method path path-options body-data options]
      (let [fdb (:fdb *fdb*)
 	   host (or (fdb :host) *sandbox-host*)
 	   use-https (fdb :use-https)
-	   url (str (if (or (nil? use-https) use-https) "https://" "http://") host "/" path)
+	   url (str (if (or (nil? use-https) use-https) "https://" "http://") host "/" (encode-path path) (encode-options path-options))
 	   connection (connection/http-connection url)]
-       (println url)
+       ;; (println (name method) url)
        (doto connection
 	 (.setRequestMethod (name method))
 	 (.setRequestProperty "Accept" (or (and options (options :accept)) (fdb :accept) *content-type*))
-	 (.setRequestProperty "Content-type" (if body-data (or (and options (options :content-type)) *content-type*) "text/plain"))
 	 (.setRequestProperty "User-agent" (or (fdb :user-agent) *user-agent*)))
 
-       (println (.getRequestProperty connection "Content-type"))
+       (if body-data
+	 (.setRequestProperty connection "Content-type" (or (and options (options :content-type)) *content-type*)))
+
+       (if-let [content-transfer-encoding (and options (options :content-transfer-encoding))]
+	 (.setRequestProperty connection "Content-transfer-encoding" content-transfer-encoding))
+
        (if-let [timeout (fdb :timeout)]
 	 (.setReadTimeout connection timeout))
 
        (if-let [user (fdb :user)]
 	 (.setRequestProperty connection "Authorization"  (credentials user (fdb :password))))
+
+;;        (println "c-t" (.getRequestProperty connection "Content-type"))
+;;        (println "c-t-e" (.getRequestProperty connection "Content-transfer-encoding"))
+;;        (println "a" (.getRequestProperty connection "Accept"))
+;;        (println body-data)
 
        (connection/start-http-connection connection body-data)
 
@@ -51,28 +77,17 @@
 	     headers (.getHeaderFields connection)
 	     content-types (.get headers "Content-Type")
 	     content-type (if content-types (.get content-types 0))
-	     content (if (= content-type "application/json")
+	     content (if (or (= content-type "application/vnd.fluiddb.value+json")
+			     (= content-type "application/json"))
 		       (with-open [input (java.io.PushbackReader. (reader (.getInputStream connection)))]
 			 (clojure.contrib.json.read/read-json input))
 		       (with-open [input (.getInputStream connection)]
 			 (slurp* input)))]
 	 [content response-code content-type headers]))))
 
-(defn- to-string [arg]
-  (if (keyword? arg)
-    (name arg)
-    (str arg)))
-
-(defn encode-options [options]
-  (apply str "?"
-	 (interpose "&"
-		    (map #(str (name (first %)) "="
-			       (URLEncoder/encode (to-string (second %)) "UTF-8"))
-			 options))))
 
 (defn option-value [options option]
   (if (some #(= % option) options) "True" "False"))
-
 
 
 (defmacro with-fluiddb
@@ -93,27 +108,26 @@
 (defn get-object
   "Get the specified object"
   [id & options]
-  (send-request :GET (str "objects/" id (encode-options {:showAbout (option-value options :about)}))))
+  (send-request :GET (str "objects/" id)  {:showAbout (option-value options :about)}))
 
 (defn query-objects [query]
-  (send-request :GET (str "objects" (encode-options {:query query}))))
+  (send-request :GET (str "objects") {:query query}))
 
 (defn create-object
   ([] (create-object nil))
   ([about]
-     (send-request :POST "objects"
+     (send-request :POST "objects" nil
 		   (clojure.contrib.json.write/json-str
-		    (if about  {"about" about})))))
+		    (if about {"about" about} {})))))
 
 (defn get-object-tag-value
   "Get a tag value for an object.  Defaults to json format for the reply."
-  ([id tag] (get-object-tag-value id tag "json"))
-  ([id tag format]
-     (send-request :GET (str "objects/" id "/" tag (encode-options {:format format}))
+  ([id tag] (get-object-tag-value id tag nil))
+  ([id tag accept]
+     (send-request :GET (str "objects/" id "/" tag)
 		   nil
-		   {:accept (fcase/case format
-					"json" "application/json"
-					"*/*")})))
+		   nil
+		   {:accept (if accept accept "*/*")} )))
 
 (defn- flatten
   "Takes any nested combination of sequential things (lists, vectors, etc.) and
@@ -125,26 +139,33 @@
 (defn set-object-tag-value
   "Set the value for a tag on an object."
   ([id tag content]
-     (set-object-tag-value id tag content nil nil))
+     (set-object-tag-value
+      id tag
+      (clojure.contrib.json.write/json-str content)
+      "application/vnd.fluiddb.value+json"
+      nil))
   ([id tag value value-type value-encoding]
-     (send-request :PUT (str "objects/" id "/" tag (encode-options {:format "json"}))
-		   (clojure.contrib.json.write/json-str
-		    (apply hash-map (flatten
-				     (filter #(second %)
-					     {:value value
-					      :valueType value-type
-					      :valueEncoding value-encoding}))))
-		   {:content-type "application/json"})))
+     (send-request :PUT (str "objects/" id "/" tag) nil value
+		   {:content-type value-type
+		    :content-transfer-encoding value-encoding})))
 
 (defn set-object-tag-value-base64
   "Set the value for a tag on an object. base64 encode the value"
-  ([id tag content]
-     (set-object-tag-value id tag (clojure.contrib.base64/encode-str content) (str (type content)) "base64")))
+  ([id tag content] (set-object-tag-value-base64 id tag content nil))
+  ([id tag content value-type]
+     (set-object-tag-value
+      id tag
+      (clojure.contrib.base64/encode-str content)
+      (or value-type "application/octet-stream") "base64")))
 
+(defn delete-object-tag
+  "Delete a tag from an object."
+  ([id tag]
+     (send-request :DELETE (str "objects/" id "/" tag) nil)))
 
 ;; Tags
 (defn create-tag [namespace tag description indexed]
-  (send-request :POST (str "tags/" namespace)
+  (send-request :POST (str "tags/" namespace) nil
 		(clojure.contrib.json.write/json-str
 		 {"name" tag
 		  "description" description
@@ -153,7 +174,7 @@
 (defn get-tag
   ([namespace tag] (get-tag namespace tag true))
   ([namespace tag return-description]
-     (send-request :GET (str "tags/" namespace "/" tag (encode-options {:returnDescription return-description})))))
+     (send-request :GET (str "tags/" namespace "/" tag) {:returnDescription return-description})))
 
 (defn delete-tag [namespace tag]
   (send-request :DELETE (str "tags/" namespace "/" tag)))
@@ -165,15 +186,13 @@
   [ns & options] ;;; return-description return-namespace return-tags
   (send-request
    :GET
-   (str "namespaces/"
-	ns
-	(encode-options
-	 {:returnDescription (option-value options :return-description)
-	  :returnNamespaces (option-value options :return-namespace)
-	  :returnTags (option-value options :return-tags)}))))
+   (str "namespaces/" ns)
+   {:returnDescription (option-value options :return-description)
+    :returnNamespaces (option-value options :return-namespace)
+    :returnTags (option-value options :return-tags)}))
 
 (defn create-namespace [ns name description]
-  (send-request :POST (str "namespaces/" ns)
+  (send-request :POST (str "namespaces/" ns) nil
                  (clojure.contrib.json.write/json-str
 		  {"description" description
 		   "name" name})))
@@ -195,24 +214,24 @@
 
 
 (defn get-namespace-permissions [namespace action]
-  (send-request :GET (str "permissions/namespaces/" namespace (encode-options {:action action}))))
+  (send-request :GET (str "permissions/namespaces/" namespace {:action action})))
 
 (defn set-namespace-permissions [namespace action policy exceptions]
-  (send-request :PUT (str "permissions/namespaces/" namespace (encode-options {:action action}))
+  (send-request :PUT (str "permissions/namespaces/" namespace {:action action})
                 (make-permission-object policy exceptions)))
 
 (defn get-tag-permissions [tag action]
-  (send-request :GET (str "permissions/tags/" tag (encode-options {:action action}))))
+  (send-request :GET (str "permissions/tags/" tag {:action action})))
 
 (defn set-tag-permissions [tag action policy exceptions]
-  (send-request :PUT (str "permissions/tags/" tag (encode-options {:action action}))
+  (send-request :PUT (str "permissions/tags/" tag {:action action})
                 (make-permission-object policy exceptions)))
 
 (defn get-tag-value-permissions [tag action]
-  (send-request :GET (str "permissions/tag-values/" tag (encode-options {:action action}))))
+  (send-request :GET (str "permissions/tag-values/" tag {:action action})))
 
 (defn set-tag-value-permissions [tag action policy exceptions]
-  (send-request :PUT (str "permissions/tag-values/" tag (encode-options {:action action}))
+  (send-request :PUT (str "permissions/tag-values/" tag {:action action})
                 (make-permission-object policy exceptions)))
 
 ;; Policies
