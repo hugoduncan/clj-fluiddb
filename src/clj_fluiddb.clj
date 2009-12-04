@@ -25,7 +25,6 @@
     (str arg)))
 
 (defn encode-options [options]
-  ;; (println "encode options" options)
   (if options
     (apply str "?"
 	   (interpose "&"
@@ -48,11 +47,13 @@
 	   use-https (fdb :use-https)
 	   url (str (if (or (nil? use-https) use-https) "https://" "http://") host "/" (encode-path path) (encode-options path-options))
 	   connection (connection/http-connection url)]
-       ;; (println (name method) url)
+
        (doto connection
 	 (.setRequestMethod (name method))
-	 (.setRequestProperty "Accept" (or (and options (options :accept)) (fdb :accept) *content-type*))
 	 (.setRequestProperty "User-agent" (or (fdb :user-agent) *user-agent*)))
+
+       (if (= (name method) "GET")
+	 (.setRequestProperty connection "Accept" (or (and options (options :accept)) (fdb :accept) *content-type*)))
 
        (if body-data
 	 (.setRequestProperty connection "Content-type" (or (and options (options :content-type)) *content-type*)))
@@ -65,11 +66,6 @@
 
        (if-let [user (fdb :user)]
 	 (.setRequestProperty connection "Authorization"  (credentials user (fdb :password))))
-
-;;        (println "c-t" (.getRequestProperty connection "Content-type"))
-;;        (println "c-t-e" (.getRequestProperty connection "Content-transfer-encoding"))
-;;        (println "a" (.getRequestProperty connection "Accept"))
-;;        (println body-data)
 
        (connection/start-http-connection connection body-data)
 
