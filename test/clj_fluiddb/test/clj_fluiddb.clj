@@ -33,7 +33,7 @@
 (def-fdb-test [query-objects "has fluiddb/about"] [:GET "objects" {:query "has fluiddb/about"}])
 (def-fdb-test [create-object] [:POST "objects"])
 (def-fdb-test [create-object "aboutme"] [:POST "objects" nil "{\"about\":\"aboutme\"}"])
-(def-fdb-test [get-object-tag-value "id" "aboutme"] [:GET "objects/id/aboutme" nil nil nil])
+(def-fdb-test [get-object-tag-value "id" "aboutme"] [:GET "objects/id/aboutme" nil nil {:accept "*/*"}])
 
 (def-fdb-test [create-namespace "ns" "música" "test namespace"] [:POST "namespaces/ns" nil "{\"description\":\"test namespace\",\"name\":\"m\\ufffdsica\"}"])
 (def-fdb-test [create-namespace "ns/música" "sub" "test namespace"] [:POST "namespaces/ns/música" nil "{\"description\":\"test namespace\",\"name\":\"sub\"}"])

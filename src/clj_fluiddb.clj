@@ -138,12 +138,12 @@
 
 (defn set-object-tag-value
   "Set the value for a tag on an object."
-  ([id tag content]
+  ([id tag value]
      (set-object-tag-value
       id tag
-      (clojure.contrib.json.write/json-str content)
-      "application/vnd.fluiddb.value+json"
-      nil))
+      (clojure.contrib.json.write/json-str value)
+      "application/vnd.fluiddb.value+json"))
+  ([id tag value value-type] (set-object-tag-value id tag value value-type nil))
   ([id tag value value-type value-encoding]
      (send-request :PUT (str "objects/" id "/" tag) nil value
 		   {:content-type value-type

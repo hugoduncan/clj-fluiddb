@@ -117,7 +117,7 @@
       (is (= 204 (second (delete-tag ns tag))))
       (is (= 204 (second (delete-namespace ns)))))))
 
-(deftest test-set-object-tag-value-base64
+(deftest test-set-object-tag-value-binary
   (with-fluiddb *test-fdb*
     (let [ns (gen-namespace)
 	  tag "tag"
@@ -126,14 +126,11 @@
       (is (= 201 response))
       (is id)
       (is (= 201 (second (create-tag ns tag "tag-description" false))))
-      (doseq [i [(.getBytes "fred")]])
-      (let [[values response content-type headers] (set-object-tag-value-base64 id (str ns "/" tag) "fred" "application/binary")]
+      (let [[values response content-type headers] (set-object-tag-value id (str ns "/" tag) (.getBytes "fred") "application/octet-stream")]
 	(is (= 204 response)))
       (let [[values response content-type headers] (get-object-tag-value id (str ns "/" tag))]
-;; 	(println "Response headers" headers)
 	(is (= 200 response))
-	(is (= "application/binary" content-type))
-;; 	(is (= "base64" content-type))
+	(is (= "application/octet-stream" content-type))
 	(is (= "fred" values)))
       (let [[values response content-type headers] (delete-object-tag id (str ns "/" tag))]
 	(is (= 204 response)))
