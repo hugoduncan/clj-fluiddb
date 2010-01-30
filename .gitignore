@@ -1,2 +1,4 @@
 *.class
 clj-fluiddb.jar
+autodoc
+lib

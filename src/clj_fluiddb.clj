@@ -1,4 +1,19 @@
-(ns clj-fluiddb
+;;;; Copyright (c) Hugo Duncan. All rights reserved.
+
+;;;; The use and distribution terms for this software are covered by the
+;;;; Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;;; which can be found in the file epl-v10.html at the root of this distribution.
+;;;; By using this software in any fashion, you are agreeing to be bound by
+;;;; the terms of this license.
+;;;; You must not remove this notice, or any other, from this software.
+
+
+(ns #^{:author "Hugo Duncan"
+       :doc "clj-fluiddb is a client library for accessing FluidDb from Clojure."
+       :see-also [["http://github.com/hugoduncan/clj-fluiddb" "Source code"]
+		  ["http://fluidinfo.com/fluiddb" "FluidDb"]
+		  ["http://github.com/hdurer/cl-fluiddb" "cl-fluiddb"]]}
+  clj-fluiddb
   (:use [clojure.contrib.http.connection :as connection]
 	[clojure.contrib.duck-streams :as duck]
 	[clojure.contrib.fcase :as fcase])
@@ -10,13 +25,17 @@
 		     UnknownHostException)
 	   (java.io.PushbackReader)))
 
-(def *host* "sandbox.fluidinfo.com")
+(def #^{:doc "Host to use for accessing FluidDB."}
+     *host* "sandbox.fluidinfo.com")
 (def *sandbox-host* "sandbox.fluidinfo.com")
-(def *user-agent* "CLJ-FLUIDDB")
+(def #^{:doc "User Agent to use in HTTP requests."}
+     *user-agent* "CLJ-FLUIDDB")
 (def *content-type* "application/json")
 (def *fdb* {:fdb nil})
 
-(defn- credentials [user password]
+(defn- credentials
+  "Encode username and password to use with Basic HTTP authentication."
+  [user password]
   (str "Basic " (clojure.contrib.base64/encode-str (str user ":" password))))
 
 (defn- to-string [arg]
