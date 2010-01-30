@@ -1,0 +1,219 @@
+<html>
+  <head>
+    <title>clj-fluiddb API reference (clj-fluiddb)</title>
+    <link href="static/favicon.png" rel="icon" />
+    <link href="static/favicon.png" rel="shortcut icon" />
+    <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="static/wiki.css" rel="stylesheet" />
+    <link media="all" type="text/css" href="static/internal.css" rel="stylesheet" />
+    <!-- TODO: are we using these (from clojure.org)? If so, add the files -->
+    <script src="file/view/code_highlighter.js" type="text/javascript"></script>
+    <script src="file/view/clojure.js" type="text/javascript"></script>
+    <style>.menuWrapper{height: 36px;}</style>
+    <!--[if lte IE 6]>
+    <link rel="stylesheet" href="http://www.wikispaces.com/_/2009051601/s/internal_ie.css" type="text/css" />
+    <![endif]-->
+  </head>
+<!--
+This document was auto-generated from the source by the clojure autodoc system.
+To report errors or ask questions about the overall documentation structure, formatting,
+etc., contact Tom Faulhaber (google mail name: tomfaulhaber).
+For errors in the documentation of a particular namespace, contact the author of that
+namespace.
+-->
+  <body>
+    <div id="AllContentContainer">
+      <div id="Header">
+	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="static/clojure-icon.gif" /></a>
+	<h1><a title="page header title" id="page-header" href="index.html">clj-fluiddb</a></h1>
+      </div>
+      <div id="leftcolumn"><div style="text-align: center;"></div>
+<div class="menu">
+  <div class="WikiCustomNav WikiElement wiki">
+    <a class="wiki_link" href="index.html">Overview</a><br />
+    <a class="wiki_link" href="api-index.html">API Index</a><br />
+    <a class="wiki_link" href="#">Namespaces:</a>
+    <ul id="left-sidebar-list">
+      <li><a href="clj-fluiddb-api.html" class="wiki_link">clj-fluiddb</a></li>
+    </ul>
+  </div>
+</div>
+</div>
+      <div id="rightcolumn">
+	<div id="Content">
+	  <div class="contentBox"><div class="innerContentBox">
+              <div id="content_view" class="wiki wikiPage">
+                <div id="right-sidebar"><div id="toc">
+  <h1 class="nopad">Table of Contents</h1>
+  <div style="margin-left: 1em;" class="toc-section">
+    <a href="#toc0">Overview</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/*host*">*host*</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/*user-agent*">*user-agent*</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/delete-object-tag">delete-object-tag</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/get-namespace">get-namespace</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/get-object">get-object</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/get-object-tag-value">get-object-tag-value</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/get-user">get-user</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/send-request">send-request</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/set-object-tag-value">set-object-tag-value</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/set-object-tag-value-base64">set-object-tag-value-base64</a>
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a href="#clj-fluiddb/with-fluiddb">with-fluiddb</a>
+    </div>
+    <br />
+  </div>
+</div>
+</div>
+                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clj-fluiddb</span></h1>
+by <span id="author">Hugo Duncan</span><br />
+<br />Usage:
+<pre>
+(ns your-namespace
+  (:require <span id="long-name">clj-fluiddb</span>))
+</pre><pre>
+</pre><h2>Overview</h2>
+<pre id="namespace-docstr">clj-fluiddb is a client library for accessing FluidDb from Clojure.</pre>
+<span id="see-also">See also: 
+  <span id="see-also-link">
+    <a href="http://github.com/hugoduncan/clj-fluiddb">Source code</a>
+  </span><span id="see-also-link">
+    <a href="http://fluidinfo.com/fluiddb">FluidDb</a>
+  </span><span id="see-also-link">
+    <a href="http://github.com/hdurer/cl-fluiddb">cl-fluiddb</a>
+  </span><br />
+</span><br />
+<h2>Public Variables and Functions</h2>
+<div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/*host*">*host*</h2>
+  <span id="var-type">var</span><br />
+  <pre id="var-usage"></pre>
+  <pre id="var-docstr">Host to use for accessing FluidDB.</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L28" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/*user-agent*">*user-agent*</h2>
+  <span id="var-type">var</span><br />
+  <pre id="var-usage"></pre>
+  <pre id="var-docstr">User Agent to use in HTTP requests.</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L31" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/delete-object-tag">delete-object-tag</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (delete-object-tag id tag)
+</pre>
+  <pre id="var-docstr">Delete a tag from an object.</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L176" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/get-namespace">get-namespace</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (get-namespace ns &amp; options)
+</pre>
+  <pre id="var-docstr">Return namespace information. Specify :return-description :return-namespace :return-tags as arguments</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L199" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/get-object">get-object</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (get-object id &amp; options)
+</pre>
+  <pre id="var-docstr">Get the specified object</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L123" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/get-object-tag-value">get-object-tag-value</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (get-object-tag-value id tag)
+       (get-object-tag-value id tag accept)
+</pre>
+  <pre id="var-docstr">Get a tag value for an object.  Defaults to json format for the reply.</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L138" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/get-user">get-user</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (get-user name)
+</pre>
+  <pre id="var-docstr">Get information on the specified user</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L116" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/send-request">send-request</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (send-request method path)
+       (send-request method path path-options)
+       (send-request method path path-options body-data)
+       (send-request method path path-options body-data options)
+</pre>
+  <pre id="var-docstr">Send a request to FluidDB.
+We inspect the return data and convert it to a lisp data structure if it is json</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L57" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/set-object-tag-value">set-object-tag-value</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (set-object-tag-value id tag value)
+       (set-object-tag-value id tag value value-type)
+       (set-object-tag-value id tag value value-type value-encoding)
+</pre>
+  <pre id="var-docstr">Set the value for a tag on an object.</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L154" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/set-object-tag-value-base64">set-object-tag-value-base64</h2>
+  <span id="var-type">function</span><br />
+  <pre id="var-usage">Usage: (set-object-tag-value-base64 id tag content)
+       (set-object-tag-value-base64 id tag content value-type)
+</pre>
+  <pre id="var-docstr">Set the value for a tag on an object. base64 encode the value</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L167" id="var-source">Source</a>
+</div><div id="var-entry">
+  <br />
+  <hr />
+  <h2 id="clj-fluiddb/with-fluiddb">with-fluiddb</h2>
+  <span id="var-type">macro</span><br />
+  <pre id="var-usage">Usage: (with-fluiddb fdb &amp; body)
+</pre>
+  <pre id="var-docstr">Specify connection parameters. Wrap all request methods with this.</pre>
+  <a href="http://github.com/hugoduncan/clj-fluiddb/blob/3b1eab349b233d1868d94146a58042fc962ef210/src/clj_fluiddb.clj#L108" id="var-source">Source</a>
+</div>
+
+
+</div>
+              </div>
+            </div>
+          </div>
+	</div>
+	<div id="foot">
+	  <div style="text-align: center;" id="copyright">Copyright Hugo Duncan 2010. All rights reserved.</div>
+	</div>
+      </div>
+      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      Clojure auto-documentation system by Tom Faulhaber.</div>
+    </div>
+    <!-- /AllContentContainer -->
+  </body>
+
+</html>
