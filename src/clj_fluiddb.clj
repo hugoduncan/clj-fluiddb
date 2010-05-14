@@ -15,9 +15,8 @@
 		  ["http://github.com/hdurer/cl-fluiddb" "cl-fluiddb"]]}
   clj-fluiddb
   (:use [clojure.contrib.http.connection :as connection]
-	[clojure.contrib.duck-streams :as duck]
-	[clojure.contrib.fcase :as fcase])
-  (:require clojure.contrib.base64 clojure.contrib.json.read clojure.contrib.json.write)
+	[clojure.contrib.duck-streams :as duck])
+  (:require clojure.contrib.base64 clojure.contrib.json)
   (:import (java.net URL
 		     URLEncoder
 		     URLConnection
@@ -95,7 +94,7 @@
 	     content (if (or (= content-type "application/vnd.fluiddb.value+json")
 			     (= content-type "application/json"))
 		       (with-open [input (java.io.PushbackReader. (reader (.getInputStream connection)))]
-			 (clojure.contrib.json.read/read-json input))
+			 (clojure.contrib.json/read-json input))
 		       (with-open [input (.getInputStream connection)]
 			 (slurp* input)))]
 	 [content response-code content-type headers]))))
@@ -132,7 +131,7 @@
   ([] (create-object nil))
   ([about]
      (send-request :POST "objects" nil
-		   (clojure.contrib.json.write/json-str
+		   (clojure.contrib.json/json-str
 		    (if about {"about" about} {})))))
 
 (defn get-object-tag-value
@@ -144,19 +143,13 @@
 		   nil
 		   {:accept (if accept accept "*/*")} )))
 
-(defn- flatten
-  "Takes any nested combination of sequential things (lists, vectors, etc.) and
-  returns their contents as a single, flat sequence. (flatten nil) returns nil."
-  [x]
-  (filter (complement sequential?)
-	  (rest (tree-seq sequential? seq x))))
 
 (defn set-object-tag-value
   "Set the value for a tag on an object."
   ([id tag value]
      (set-object-tag-value
       id tag
-      (clojure.contrib.json.write/json-str value)
+      (clojure.contrib.json/json-str value)
       "application/vnd.fluiddb.value+json"))
   ([id tag value value-type] (set-object-tag-value id tag value value-type nil))
   ([id tag value value-type value-encoding]
@@ -181,7 +174,7 @@
 ;; Tags
 (defn create-tag [namespace tag description indexed]
   (send-request :POST (str "tags/" namespace) nil
-		(clojure.contrib.json.write/json-str
+		(clojure.contrib.json/json-str
 		 {"name" tag
 		  "description" description
 		  "indexed" indexed})))
@@ -208,13 +201,13 @@
 
 (defn create-namespace [ns name description]
   (send-request :POST (str "namespaces/" ns) nil
-                 (clojure.contrib.json.write/json-str
+                 (clojure.contrib.json/json-str
 		  {"description" description
 		   "name" name})))
 
 (defn change-namespace [ns new-description]
   (send-request :PUT (str "namespaces/" ns)
-                 (clojure.contrib.json.write/json-str
+                 (clojure.contrib.json/json-str
 		  {"description" new-description})))
 
 (defn delete-namespace [ns]
@@ -223,7 +216,7 @@
 
 ;; Permissions
 (defn make-permission-object [policy exceptions]
-  (clojure.contrib.json.write/json-str
+  (clojure.contrib.json/json-str
    { "policy" policy
      "exceptions" exceptions }))
 
