@@ -94,7 +94,7 @@
 	     content (if (or (= content-type "application/vnd.fluiddb.value+json")
 			     (= content-type "application/json"))
 		       (with-open [input (java.io.PushbackReader. (reader (.getInputStream connection)))]
-			 (clojure.contrib.json/read-json input))
+			 (clojure.contrib.json/read-json input false))
 		       (with-open [input (.getInputStream connection)]
 			 (slurp* input)))]
 	 [content response-code content-type headers]))))
