@@ -1,4 +1,4 @@
-(defproject clj-fluiddb "0.0.1-SNAPSHOT"
+(defproject clj-fluiddb "0.1.0-SNAPSHOT"
   :description "FluidDb Client Library"
   :url "http://github.com/hugoduncan/clj-fluiddb"
   :dependencies [[org.clojure/clojure "1.2.0-master-SNAPSHOT"]
